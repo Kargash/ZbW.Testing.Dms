@@ -33,20 +33,24 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Typ"/>
             <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding TypItems}" SelectedItem="{Binding SelectedTypItem}"/>
 
-            <Button Grid.Row="0" Grid.Column="5" Content="Suchen"/>
-            <Button Grid.Row="1" Grid.Column="5" Content="Reset"/>
+            <Button Grid.Row="0" Grid.Column="5" Content="Suchen" Command="{Binding CmdSuchen}"/>
+            <Button Grid.Row="1" Grid.Column="5" Content="Reset" Command="{Binding CmdReset}"/>
         </Grid>
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding FilteredMetadataItems}"
                   SelectedItem="{Binding SelectedMetadataItem}"
-                  AutoGenerateColumns="True">
-            <!--TODO: Remove AutoGenerateColumns="True" and specify your own columns -->
-            <!--<DataGrid.Columns>
-                <DataGridTextColumn Header="Typ" Binding="{Binding Typ}"/>
-                <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Bezeichnung}"/>
-            </DataGrid.Columns>-->
+                  AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Typ" Binding="{Binding Type}"/>
+                <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Title}"/>
+                <DataGridTextColumn Header="Valutadatum" Binding="{Binding ValutaDate, StringFormat=d, ConverterCulture=de-CH}"/>
+                <DataGridTextColumn Header="Erfassungsdatum" Binding="{Binding EntryDate, StringFormat=d, ConverterCulture=de-CH}"/>
+                <DataGridTextColumn Header="Stichwörter" Binding="{Binding Notes}"/>
+                <DataGridTextColumn Header="GUID" Binding="{Binding Guid}"/>
+                <DataGridTextColumn Header="Benutzer" Binding="{Binding Username}"/>
+            </DataGrid.Columns>
         </DataGrid>
 
-        <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Content="Öffnen" Width="100"/>
+        <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Content="Öffnen" Width="100" Command="{Binding CmdOeffnen}"/>
     </Grid>
 </UserControl>

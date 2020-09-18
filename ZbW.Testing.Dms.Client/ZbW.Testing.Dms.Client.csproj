@@ -70,7 +70,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Services\GetFileName.cs" />
+    <Compile Include="Services\IGetFileName.cs" />
+    <Compile Include="Services\IMessage.cs" />
+    <Compile Include="Services\ImportMetadata.cs" />
+    <Compile Include="Services\ISerializer.cs" />
     <Compile Include="Model\MetadataItem.cs" />
+    <Compile Include="Services\SearchInList.cs" />
+    <Compile Include="Services\ShowMessageBox.cs" />
+    <Compile Include="Services\XmlSer.cs" />
     <Compile Include="Repositories\ComboBoxItems.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -145,8 +153,6 @@
   <ItemGroup>
     <Resource Include="Images\magnifying_glass.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,4 +1,9 @@
-﻿namespace ZbW.Testing.Dms.Client.ViewModels
+﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using ZbW.Testing.Dms.Client.Services;
+
+namespace ZbW.Testing.Dms.Client.ViewModels
 {
     using System.Collections.Generic;
 
@@ -8,8 +13,10 @@
     using ZbW.Testing.Dms.Client.Model;
     using ZbW.Testing.Dms.Client.Repositories;
 
-    internal class SearchViewModel : BindableBase
+    public class SearchViewModel : BindableBase
     {
+        private List<MetadataItem> _allItems;
+
         private List<MetadataItem> _filteredMetadataItems;
 
         private MetadataItem _selectedMetadataItem;
@@ -20,21 +27,27 @@
 
         private List<string> _typItems;
 
-        public SearchViewModel()
+        [ExcludeFromCodeCoverage]
+        public SearchViewModel(bool isNotATest)
         {
             TypItems = ComboBoxItems.Typ;
-
             CmdSuchen = new DelegateCommand(OnCmdSuchen);
             CmdReset = new DelegateCommand(OnCmdReset);
             CmdOeffnen = new DelegateCommand(OnCmdOeffnen, OnCanCmdOeffnen);
+            if (isNotATest)
+                LoadData();
         }
 
+        [ExcludeFromCodeCoverage]
         public DelegateCommand CmdOeffnen { get; }
 
+        [ExcludeFromCodeCoverage]
         public DelegateCommand CmdSuchen { get; }
 
+        [ExcludeFromCodeCoverage]
         public DelegateCommand CmdReset { get; }
 
+        [ExcludeFromCodeCoverage]
         public string Suchbegriff
         {
             get
@@ -48,6 +61,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public List<string> TypItems
         {
             get
@@ -61,6 +75,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public string SelectedTypItem
         {
             get
@@ -74,6 +89,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public List<MetadataItem> FilteredMetadataItems
         {
             get
@@ -87,6 +103,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public MetadataItem SelectedMetadataItem
         {
             get
@@ -103,6 +120,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private bool OnCanCmdOeffnen()
         {
             return SelectedMetadataItem != null;
@@ -110,17 +128,38 @@
 
         private void OnCmdOeffnen()
         {
-            // TODO: Add your Code here
+            var selectedPath = ConfigurationManager.AppSettings.Get("RepositoryDir") + @"\" + SelectedMetadataItem.ValutaDate.Year;
+            var di = new DirectoryInfo(selectedPath);
+            var files = di.GetFiles("*_Content.*");
+            foreach (var file in files)
+            {
+                if (file.FullName.Contains(SelectedMetadataItem.Guid))
+                {
+                    System.Diagnostics.Process.Start(file.FullName);
+                }
+            }
         }
 
         private void OnCmdSuchen()
         {
-            // TODO: Add your Code here
+            FilteredMetadataItems = _allItems;
+            var search = new SearchInList();
+            FilteredMetadataItems = search.GetMatchingItems(FilteredMetadataItems, Suchbegriff, SelectedTypItem);
         }
 
-        private void OnCmdReset()
+        public void OnCmdReset()
         {
-            // TODO: Add your Code here
+            Suchbegriff = null;
+            SelectedTypItem = null;
+            FilteredMetadataItems = _allItems;
+        }
+
+        private void LoadData()
+        {
+            var directoryPath = ConfigurationManager.AppSettings.Get("RepositoryDir");
+            var imp = new ImportMetadata();
+            _allItems = imp.ImportMetafiles(directoryPath, new XmlSer());
+            FilteredMetadataItems = _allItems;
         }
     }
 }

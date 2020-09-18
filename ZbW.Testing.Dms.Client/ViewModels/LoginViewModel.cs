@@ -1,4 +1,6 @@
-﻿namespace ZbW.Testing.Dms.Client.ViewModels
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace ZbW.Testing.Dms.Client.ViewModels
 {
     using System.Windows;
 
@@ -7,6 +9,7 @@
 
     using ZbW.Testing.Dms.Client.Views;
 
+    [ExcludeFromCodeCoverage]
     internal class LoginViewModel : BindableBase
     {
         private readonly LoginView _loginView;

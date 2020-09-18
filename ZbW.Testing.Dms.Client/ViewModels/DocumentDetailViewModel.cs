@@ -1,4 +1,10 @@
-﻿namespace ZbW.Testing.Dms.Client.ViewModels
+﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using ZbW.Testing.Dms.Client.Model;
+using ZbW.Testing.Dms.Client.Services;
+
+namespace ZbW.Testing.Dms.Client.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -10,7 +16,7 @@
 
     using ZbW.Testing.Dms.Client.Repositories;
 
-    internal class DocumentDetailViewModel : BindableBase
+    public class DocumentDetailViewModel : BindableBase
     {
         private readonly Action _navigateBack;
 
@@ -31,7 +37,8 @@
         private List<string> _typItems;
 
         private DateTime? _valutaDatum;
-
+        
+        [ExcludeFromCodeCoverage]
         public DocumentDetailViewModel(string benutzer, Action navigateBack)
         {
             _navigateBack = navigateBack;
@@ -43,6 +50,9 @@
             CmdSpeichern = new DelegateCommand(OnCmdSpeichern);
         }
 
+        public string FilePath { get; set; }
+
+        [ExcludeFromCodeCoverage]
         public string Stichwoerter
         {
             get
@@ -56,6 +66,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public string Bezeichnung
         {
             get
@@ -69,6 +80,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public List<string> TypItems
         {
             get
@@ -82,6 +94,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public string SelectedTypItem
         {
             get
@@ -95,6 +108,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public DateTime Erfassungsdatum
         {
             get
@@ -108,6 +122,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public string Benutzer
         {
             get
@@ -121,10 +136,13 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public DelegateCommand CmdDurchsuchen { get; }
 
+        [ExcludeFromCodeCoverage]
         public DelegateCommand CmdSpeichern { get; }
 
+        [ExcludeFromCodeCoverage]
         public DateTime? ValutaDatum
         {
             get
@@ -138,6 +156,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public bool IsRemoveFileEnabled
         {
             get
@@ -151,6 +170,7 @@
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private void OnCmdDurchsuchen()
         {
             var openFileDialog = new OpenFileDialog();
@@ -158,15 +178,74 @@
 
             if (result.GetValueOrDefault())
             {
-                _filePath = openFileDialog.FileName;
+                FilePath = openFileDialog.FileName;
             }
         }
 
         private void OnCmdSpeichern()
         {
-            // TODO: Add your Code here
+            var guidString = Guid.NewGuid().ToString();
+            var directoryPath = ConfigurationManager.AppSettings.Get("RepositoryDir");
+            var path = Directory.CreateDirectory(directoryPath + @"\" + ValutaDatum?.Year).FullName;
 
-            _navigateBack();
+            if (SaveXml(path, guidString, new GetFileName(),new ShowMessageBox(), new XmlSer()))
+            {
+                SaveDocument(new GetFileName(), path, guidString);
+                _navigateBack();
+            }
+        }
+
+        public bool SaveDocument(IGetFileName getName, string destPath, string guid)
+        {
+            try
+            {
+                if (File.Exists(FilePath))
+                {
+                    var destName = getName.GetContentName(FilePath, guid, destPath);
+                    if (IsRemoveFileEnabled)
+                    {
+                        File.Move(FilePath, destName);
+                        return true;
+                    }
+                    File.Copy(FilePath, destName);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public bool SaveXml(string destPath, string guid, IGetFileName getName, IMessage mb, ISerializer ser)
+        {
+            if (!IsFileSelected())
+            {
+                mb.ShowMessage("Keine Datei ausgewählt!");
+                return false;
+            }
+            if (AreRequiredFieldsValid())
+            {
+                var newItem = new MetadataItem(guid, Bezeichnung, (DateTime)ValutaDatum, SelectedTypItem, Stichwoerter, Erfassungsdatum, Benutzer);
+                var fileName = getName.GetMetadataName(destPath, guid);
+                ser.SerializeFile(newItem, fileName);
+                return true;
+            }
+            mb.ShowMessage("Es müssen alle Pflichtfelder ausgefüllt werden!");
+            return false;
+        }
+
+        private bool AreRequiredFieldsValid()
+        {
+            return (!string.IsNullOrEmpty(Bezeichnung) && ValutaDatum != null && !string.IsNullOrEmpty(SelectedTypItem));
+        }
+
+        private bool IsFileSelected()
+        {
+            if (string.IsNullOrEmpty(FilePath))
+                return false;
+            return true;
         }
     }
 }
