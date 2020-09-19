@@ -40,6 +40,10 @@
                   ItemsSource="{Binding FilteredMetadataItems}"
                   SelectedItem="{Binding SelectedMetadataItem}"
                   AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
+            <DataGrid.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick"
+                              Command="{Binding CmdOeffnen}"/>
+            </DataGrid.InputBindings>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Typ" Binding="{Binding Type}"/>
                 <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Title}"/>
